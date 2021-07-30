@@ -27,8 +27,8 @@ import (
 	"sync"
 	"time"
 
-	vsphere "github.com/equinix/terraform-provider-metal/metal"
 	"github.com/gobuffalo/flect"
+	vsphere "github.com/hashicorp/terraform-provider-vsphere/vsphere"
 	auditlib "go.bytebuilders.dev/audit/lib"
 	arv1 "k8s.io/api/admissionregistration/v1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -39,36 +39,54 @@ import (
 	admissionregistrationv1 "k8s.io/client-go/kubernetes/typed/admissionregistration/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
-	bgpv1alpha1 "kubeform.dev/provider-vsphere-api/apis/bgp/v1alpha1"
-	connectionv1alpha1 "kubeform.dev/provider-vsphere-api/apis/connection/v1alpha1"
-	devicev1alpha1 "kubeform.dev/provider-vsphere-api/apis/device/v1alpha1"
-	gatewayv1alpha1 "kubeform.dev/provider-vsphere-api/apis/gateway/v1alpha1"
-	ipv1alpha1 "kubeform.dev/provider-vsphere-api/apis/ip/v1alpha1"
-	organizationv1alpha1 "kubeform.dev/provider-vsphere-api/apis/organization/v1alpha1"
-	portv1alpha1 "kubeform.dev/provider-vsphere-api/apis/port/v1alpha1"
-	projectv1alpha1 "kubeform.dev/provider-vsphere-api/apis/project/v1alpha1"
-	reservedv1alpha1 "kubeform.dev/provider-vsphere-api/apis/reserved/v1alpha1"
-	spotv1alpha1 "kubeform.dev/provider-vsphere-api/apis/spot/v1alpha1"
-	sshv1alpha1 "kubeform.dev/provider-vsphere-api/apis/ssh/v1alpha1"
-	userv1alpha1 "kubeform.dev/provider-vsphere-api/apis/user/v1alpha1"
+	computev1alpha1 "kubeform.dev/provider-vsphere-api/apis/compute/v1alpha1"
+	contentv1alpha1 "kubeform.dev/provider-vsphere-api/apis/content/v1alpha1"
+	customv1alpha1 "kubeform.dev/provider-vsphere-api/apis/custom/v1alpha1"
+	datacenterv1alpha1 "kubeform.dev/provider-vsphere-api/apis/datacenter/v1alpha1"
+	datastorev1alpha1 "kubeform.dev/provider-vsphere-api/apis/datastore/v1alpha1"
+	distributedv1alpha1 "kubeform.dev/provider-vsphere-api/apis/distributed/v1alpha1"
+	dpmv1alpha1 "kubeform.dev/provider-vsphere-api/apis/dpm/v1alpha1"
+	drsv1alpha1 "kubeform.dev/provider-vsphere-api/apis/drs/v1alpha1"
+	entityv1alpha1 "kubeform.dev/provider-vsphere-api/apis/entity/v1alpha1"
+	filev1alpha1 "kubeform.dev/provider-vsphere-api/apis/file/v1alpha1"
+	folderv1alpha1 "kubeform.dev/provider-vsphere-api/apis/folder/v1alpha1"
+	hav1alpha1 "kubeform.dev/provider-vsphere-api/apis/ha/v1alpha1"
+	hostv1alpha1 "kubeform.dev/provider-vsphere-api/apis/host/v1alpha1"
+	licensev1alpha1 "kubeform.dev/provider-vsphere-api/apis/license/v1alpha1"
+	nasv1alpha1 "kubeform.dev/provider-vsphere-api/apis/nas/v1alpha1"
+	resourcev1alpha1 "kubeform.dev/provider-vsphere-api/apis/resource/v1alpha1"
+	rolev1alpha1 "kubeform.dev/provider-vsphere-api/apis/role/v1alpha1"
+	storagev1alpha1 "kubeform.dev/provider-vsphere-api/apis/storage/v1alpha1"
+	tagv1alpha1 "kubeform.dev/provider-vsphere-api/apis/tag/v1alpha1"
+	vappv1alpha1 "kubeform.dev/provider-vsphere-api/apis/vapp/v1alpha1"
 	virtualv1alpha1 "kubeform.dev/provider-vsphere-api/apis/virtual/v1alpha1"
-	vlanv1alpha1 "kubeform.dev/provider-vsphere-api/apis/vlan/v1alpha1"
-	volumev1alpha1 "kubeform.dev/provider-vsphere-api/apis/volume/v1alpha1"
-	controllersbgp "kubeform.dev/provider-vsphere-controller/controllers/bgp"
-	controllersconnection "kubeform.dev/provider-vsphere-controller/controllers/connection"
-	controllersdevice "kubeform.dev/provider-vsphere-controller/controllers/device"
-	controllersgateway "kubeform.dev/provider-vsphere-controller/controllers/gateway"
-	controllersip "kubeform.dev/provider-vsphere-controller/controllers/ip"
-	controllersorganization "kubeform.dev/provider-vsphere-controller/controllers/organization"
-	controllersport "kubeform.dev/provider-vsphere-controller/controllers/port"
-	controllersproject "kubeform.dev/provider-vsphere-controller/controllers/project"
-	controllersreserved "kubeform.dev/provider-vsphere-controller/controllers/reserved"
-	controllersspot "kubeform.dev/provider-vsphere-controller/controllers/spot"
-	controllersssh "kubeform.dev/provider-vsphere-controller/controllers/ssh"
-	controllersuser "kubeform.dev/provider-vsphere-controller/controllers/user"
+	vmv1alpha1 "kubeform.dev/provider-vsphere-api/apis/vm/v1alpha1"
+	vmfsv1alpha1 "kubeform.dev/provider-vsphere-api/apis/vmfs/v1alpha1"
+	vnicv1alpha1 "kubeform.dev/provider-vsphere-api/apis/vnic/v1alpha1"
+	controllerscompute "kubeform.dev/provider-vsphere-controller/controllers/compute"
+	controllerscontent "kubeform.dev/provider-vsphere-controller/controllers/content"
+	controllerscustom "kubeform.dev/provider-vsphere-controller/controllers/custom"
+	controllersdatacenter "kubeform.dev/provider-vsphere-controller/controllers/datacenter"
+	controllersdatastore "kubeform.dev/provider-vsphere-controller/controllers/datastore"
+	controllersdistributed "kubeform.dev/provider-vsphere-controller/controllers/distributed"
+	controllersdpm "kubeform.dev/provider-vsphere-controller/controllers/dpm"
+	controllersdrs "kubeform.dev/provider-vsphere-controller/controllers/drs"
+	controllersentity "kubeform.dev/provider-vsphere-controller/controllers/entity"
+	controllersfile "kubeform.dev/provider-vsphere-controller/controllers/file"
+	controllersfolder "kubeform.dev/provider-vsphere-controller/controllers/folder"
+	controllersha "kubeform.dev/provider-vsphere-controller/controllers/ha"
+	controllershost "kubeform.dev/provider-vsphere-controller/controllers/host"
+	controllerslicense "kubeform.dev/provider-vsphere-controller/controllers/license"
+	controllersnas "kubeform.dev/provider-vsphere-controller/controllers/nas"
+	controllersresource "kubeform.dev/provider-vsphere-controller/controllers/resource"
+	controllersrole "kubeform.dev/provider-vsphere-controller/controllers/role"
+	controllersstorage "kubeform.dev/provider-vsphere-controller/controllers/storage"
+	controllerstag "kubeform.dev/provider-vsphere-controller/controllers/tag"
+	controllersvapp "kubeform.dev/provider-vsphere-controller/controllers/vapp"
 	controllersvirtual "kubeform.dev/provider-vsphere-controller/controllers/virtual"
-	controllersvlan "kubeform.dev/provider-vsphere-controller/controllers/vlan"
-	controllersvolume "kubeform.dev/provider-vsphere-controller/controllers/volume"
+	controllersvm "kubeform.dev/provider-vsphere-controller/controllers/vm"
+	controllersvmfs "kubeform.dev/provider-vsphere-controller/controllers/vmfs"
+	controllersvnic "kubeform.dev/provider-vsphere-controller/controllers/vnic"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
@@ -253,345 +271,705 @@ func updateVWC(vwcClient *admissionregistrationv1.AdmissionregistrationV1Client,
 func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVersionKind, auditor *auditlib.EventPublisher, watchOnlyDefault bool) error {
 	switch gvk {
 	case schema.GroupVersionKind{
-		Group:   "bgp.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Session",
+		Kind:    "Cluster",
 	}:
-		if err := (&controllersbgp.SessionReconciler{
+		if err := (&controllerscompute.ClusterReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Session"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Cluster"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_bgp_session"],
-			TypeName:         "metal_bgp_session",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_compute_cluster"],
+			TypeName:         "vsphere_compute_cluster",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Session")
+			setupLog.Error(err, "unable to create controller", "controller", "Cluster")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "connection.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Connection",
+		Kind:    "ClusterHostGroup",
 	}:
-		if err := (&controllersconnection.ConnectionReconciler{
+		if err := (&controllerscompute.ClusterHostGroupReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Connection"),
+			Log:              ctrl.Log.WithName("controllers").WithName("ClusterHostGroup"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_connection"],
-			TypeName:         "metal_connection",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_compute_cluster_host_group"],
+			TypeName:         "vsphere_compute_cluster_host_group",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Connection")
+			setupLog.Error(err, "unable to create controller", "controller", "ClusterHostGroup")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "device.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Device",
+		Kind:    "ClusterVmAffinityRule",
 	}:
-		if err := (&controllersdevice.DeviceReconciler{
+		if err := (&controllerscompute.ClusterVmAffinityRuleReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Device"),
+			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmAffinityRule"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_device"],
-			TypeName:         "metal_device",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_compute_cluster_vm_affinity_rule"],
+			TypeName:         "vsphere_compute_cluster_vm_affinity_rule",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Device")
+			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmAffinityRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "device.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "NetworkType",
+		Kind:    "ClusterVmAntiAffinityRule",
 	}:
-		if err := (&controllersdevice.NetworkTypeReconciler{
+		if err := (&controllerscompute.ClusterVmAntiAffinityRuleReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("NetworkType"),
+			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmAntiAffinityRule"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_device_network_type"],
-			TypeName:         "metal_device_network_type",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_compute_cluster_vm_anti_affinity_rule"],
+			TypeName:         "vsphere_compute_cluster_vm_anti_affinity_rule",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "NetworkType")
+			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmAntiAffinityRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "gateway.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Gateway",
+		Kind:    "ClusterVmDependencyRule",
 	}:
-		if err := (&controllersgateway.GatewayReconciler{
+		if err := (&controllerscompute.ClusterVmDependencyRuleReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Gateway"),
+			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmDependencyRule"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_gateway"],
-			TypeName:         "metal_gateway",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_compute_cluster_vm_dependency_rule"],
+			TypeName:         "vsphere_compute_cluster_vm_dependency_rule",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Gateway")
+			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmDependencyRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "ip.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Attachment",
+		Kind:    "ClusterVmGroup",
 	}:
-		if err := (&controllersip.AttachmentReconciler{
+		if err := (&controllerscompute.ClusterVmGroupReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Attachment"),
+			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmGroup"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_ip_attachment"],
-			TypeName:         "metal_ip_attachment",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_compute_cluster_vm_group"],
+			TypeName:         "vsphere_compute_cluster_vm_group",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Attachment")
+			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmGroup")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "organization.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Organization",
+		Kind:    "ClusterVmHostRule",
 	}:
-		if err := (&controllersorganization.OrganizationReconciler{
+		if err := (&controllerscompute.ClusterVmHostRuleReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Organization"),
+			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmHostRule"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_organization"],
-			TypeName:         "metal_organization",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_compute_cluster_vm_host_rule"],
+			TypeName:         "vsphere_compute_cluster_vm_host_rule",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Organization")
+			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmHostRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "port.vsphere.kubeform.com",
+		Group:   "content.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "VlanAttachment",
+		Kind:    "Library",
 	}:
-		if err := (&controllersport.VlanAttachmentReconciler{
+		if err := (&controllerscontent.LibraryReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("VlanAttachment"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Library"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_port_vlan_attachment"],
-			TypeName:         "metal_port_vlan_attachment",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_content_library"],
+			TypeName:         "vsphere_content_library",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "VlanAttachment")
+			setupLog.Error(err, "unable to create controller", "controller", "Library")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.vsphere.kubeform.com",
+		Group:   "content.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Project",
+		Kind:    "LibraryItem",
 	}:
-		if err := (&controllersproject.ProjectReconciler{
+		if err := (&controllerscontent.LibraryItemReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Project"),
+			Log:              ctrl.Log.WithName("controllers").WithName("LibraryItem"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_project"],
-			TypeName:         "metal_project",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_content_library_item"],
+			TypeName:         "vsphere_content_library_item",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Project")
+			setupLog.Error(err, "unable to create controller", "controller", "LibraryItem")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.vsphere.kubeform.com",
+		Group:   "custom.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "ApiKey",
+		Kind:    "Attribute",
 	}:
-		if err := (&controllersproject.ApiKeyReconciler{
+		if err := (&controllerscustom.AttributeReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ApiKey"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Attribute"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_project_api_key"],
-			TypeName:         "metal_project_api_key",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_custom_attribute"],
+			TypeName:         "vsphere_custom_attribute",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "ApiKey")
+			setupLog.Error(err, "unable to create controller", "controller", "Attribute")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.vsphere.kubeform.com",
+		Group:   "datacenter.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "SshKey",
+		Kind:    "Datacenter",
 	}:
-		if err := (&controllersproject.SshKeyReconciler{
+		if err := (&controllersdatacenter.DatacenterReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("SshKey"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Datacenter"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_project_ssh_key"],
-			TypeName:         "metal_project_ssh_key",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_datacenter"],
+			TypeName:         "vsphere_datacenter",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "SshKey")
+			setupLog.Error(err, "unable to create controller", "controller", "Datacenter")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "reserved.vsphere.kubeform.com",
+		Group:   "datastore.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "IpBlock",
+		Kind:    "Cluster",
 	}:
-		if err := (&controllersreserved.IpBlockReconciler{
+		if err := (&controllersdatastore.ClusterReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("IpBlock"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Cluster"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_reserved_ip_block"],
-			TypeName:         "metal_reserved_ip_block",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_datastore_cluster"],
+			TypeName:         "vsphere_datastore_cluster",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "IpBlock")
+			setupLog.Error(err, "unable to create controller", "controller", "Cluster")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "spot.vsphere.kubeform.com",
+		Group:   "datastore.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "MarketRequest",
+		Kind:    "ClusterVmAntiAffinityRule",
 	}:
-		if err := (&controllersspot.MarketRequestReconciler{
+		if err := (&controllersdatastore.ClusterVmAntiAffinityRuleReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("MarketRequest"),
+			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmAntiAffinityRule"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_spot_market_request"],
-			TypeName:         "metal_spot_market_request",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_datastore_cluster_vm_anti_affinity_rule"],
+			TypeName:         "vsphere_datastore_cluster_vm_anti_affinity_rule",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "MarketRequest")
+			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmAntiAffinityRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "ssh.vsphere.kubeform.com",
+		Group:   "distributed.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Key",
+		Kind:    "PortGroup",
 	}:
-		if err := (&controllersssh.KeyReconciler{
+		if err := (&controllersdistributed.PortGroupReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Key"),
+			Log:              ctrl.Log.WithName("controllers").WithName("PortGroup"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_ssh_key"],
-			TypeName:         "metal_ssh_key",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_distributed_port_group"],
+			TypeName:         "vsphere_distributed_port_group",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Key")
+			setupLog.Error(err, "unable to create controller", "controller", "PortGroup")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "user.vsphere.kubeform.com",
+		Group:   "distributed.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "ApiKey",
+		Kind:    "VirtualSwitch",
 	}:
-		if err := (&controllersuser.ApiKeyReconciler{
+		if err := (&controllersdistributed.VirtualSwitchReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ApiKey"),
+			Log:              ctrl.Log.WithName("controllers").WithName("VirtualSwitch"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_user_api_key"],
-			TypeName:         "metal_user_api_key",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_distributed_virtual_switch"],
+			TypeName:         "vsphere_distributed_virtual_switch",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "ApiKey")
+			setupLog.Error(err, "unable to create controller", "controller", "VirtualSwitch")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "dpm.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "HostOverride",
+	}:
+		if err := (&controllersdpm.HostOverrideReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("HostOverride"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_dpm_host_override"],
+			TypeName:         "vsphere_dpm_host_override",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "HostOverride")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "drs.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "VmOverride",
+	}:
+		if err := (&controllersdrs.VmOverrideReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("VmOverride"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_drs_vm_override"],
+			TypeName:         "vsphere_drs_vm_override",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "VmOverride")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "entity.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Permissions",
+	}:
+		if err := (&controllersentity.PermissionsReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Permissions"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_entity_permissions"],
+			TypeName:         "vsphere_entity_permissions",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Permissions")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "file.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "File",
+	}:
+		if err := (&controllersfile.FileReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("File"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_file"],
+			TypeName:         "vsphere_file",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "File")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "folder.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Folder",
+	}:
+		if err := (&controllersfolder.FolderReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Folder"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_folder"],
+			TypeName:         "vsphere_folder",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Folder")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "ha.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "VmOverride",
+	}:
+		if err := (&controllersha.VmOverrideReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("VmOverride"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_ha_vm_override"],
+			TypeName:         "vsphere_ha_vm_override",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "VmOverride")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "host.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Host",
+	}:
+		if err := (&controllershost.HostReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Host"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_host"],
+			TypeName:         "vsphere_host",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Host")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "host.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "PortGroup",
+	}:
+		if err := (&controllershost.PortGroupReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("PortGroup"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_host_port_group"],
+			TypeName:         "vsphere_host_port_group",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "PortGroup")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "host.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "VirtualSwitch",
+	}:
+		if err := (&controllershost.VirtualSwitchReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("VirtualSwitch"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_host_virtual_switch"],
+			TypeName:         "vsphere_host_virtual_switch",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "VirtualSwitch")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "license.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "License",
+	}:
+		if err := (&controllerslicense.LicenseReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("License"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_license"],
+			TypeName:         "vsphere_license",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "License")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "nas.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Datastore",
+	}:
+		if err := (&controllersnas.DatastoreReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Datastore"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_nas_datastore"],
+			TypeName:         "vsphere_nas_datastore",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Datastore")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "resource.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Pool",
+	}:
+		if err := (&controllersresource.PoolReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Pool"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_resource_pool"],
+			TypeName:         "vsphere_resource_pool",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Pool")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "role.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Role",
+	}:
+		if err := (&controllersrole.RoleReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Role"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_role"],
+			TypeName:         "vsphere_role",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Role")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "storage.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DrsVmOverride",
+	}:
+		if err := (&controllersstorage.DrsVmOverrideReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("DrsVmOverride"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_storage_drs_vm_override"],
+			TypeName:         "vsphere_storage_drs_vm_override",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "DrsVmOverride")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "tag.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Tag",
+	}:
+		if err := (&controllerstag.TagReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Tag"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_tag"],
+			TypeName:         "vsphere_tag",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Tag")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "tag.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Category",
+	}:
+		if err := (&controllerstag.CategoryReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Category"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_tag_category"],
+			TypeName:         "vsphere_tag_category",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Category")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "vapp.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Container",
+	}:
+		if err := (&controllersvapp.ContainerReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Container"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_vapp_container"],
+			TypeName:         "vsphere_vapp_container",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Container")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "vapp.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Entity",
+	}:
+		if err := (&controllersvapp.EntityReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Entity"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_vapp_entity"],
+			TypeName:         "vsphere_vapp_entity",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Entity")
 			return err
 		}
 	case schema.GroupVersionKind{
 		Group:   "virtual.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Circuit",
+		Kind:    "Disk",
 	}:
-		if err := (&controllersvirtual.CircuitReconciler{
+		if err := (&controllersvirtual.DiskReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Circuit"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Disk"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_virtual_circuit"],
-			TypeName:         "metal_virtual_circuit",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_virtual_disk"],
+			TypeName:         "vsphere_virtual_disk",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Circuit")
+			setupLog.Error(err, "unable to create controller", "controller", "Disk")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "vlan.vsphere.kubeform.com",
+		Group:   "virtual.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Vlan",
+		Kind:    "Machine",
 	}:
-		if err := (&controllersvlan.VlanReconciler{
+		if err := (&controllersvirtual.MachineReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Vlan"),
+			Log:              ctrl.Log.WithName("controllers").WithName("Machine"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_vlan"],
-			TypeName:         "metal_vlan",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_virtual_machine"],
+			TypeName:         "vsphere_virtual_machine",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Vlan")
+			setupLog.Error(err, "unable to create controller", "controller", "Machine")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "volume.vsphere.kubeform.com",
+		Group:   "virtual.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Volume",
+		Kind:    "MachineSnapshot",
 	}:
-		if err := (&controllersvolume.VolumeReconciler{
+		if err := (&controllersvirtual.MachineSnapshotReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Volume"),
+			Log:              ctrl.Log.WithName("controllers").WithName("MachineSnapshot"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_volume"],
-			TypeName:         "metal_volume",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_virtual_machine_snapshot"],
+			TypeName:         "vsphere_virtual_machine_snapshot",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Volume")
+			setupLog.Error(err, "unable to create controller", "controller", "MachineSnapshot")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "volume.vsphere.kubeform.com",
+		Group:   "vm.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Attachment",
+		Kind:    "StoragePolicy",
 	}:
-		if err := (&controllersvolume.AttachmentReconciler{
+		if err := (&controllersvm.StoragePolicyReconciler{
 			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Attachment"),
+			Log:              ctrl.Log.WithName("controllers").WithName("StoragePolicy"),
 			Scheme:           mgr.GetScheme(),
 			Gvk:              gvk,
 			Provider:         vsphere.Provider(),
-			Resource:         vsphere.Provider().ResourcesMap["metal_volume_attachment"],
-			TypeName:         "metal_volume_attachment",
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_vm_storage_policy"],
+			TypeName:         "vsphere_vm_storage_policy",
 			WatchOnlyDefault: watchOnlyDefault,
 		}).SetupWithManager(ctx, mgr, auditor); err != nil {
-			setupLog.Error(err, "unable to create controller", "controller", "Attachment")
+			setupLog.Error(err, "unable to create controller", "controller", "StoragePolicy")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "vmfs.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Datastore",
+	}:
+		if err := (&controllersvmfs.DatastoreReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Datastore"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_vmfs_datastore"],
+			TypeName:         "vsphere_vmfs_datastore",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Datastore")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "vnic.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Vnic",
+	}:
+		if err := (&controllersvnic.VnicReconciler{
+			Client:           mgr.GetClient(),
+			Log:              ctrl.Log.WithName("controllers").WithName("Vnic"),
+			Scheme:           mgr.GetScheme(),
+			Gvk:              gvk,
+			Provider:         vsphere.Provider(),
+			Resource:         vsphere.Provider().ResourcesMap["vsphere_vnic"],
+			TypeName:         "vsphere_vnic",
+			WatchOnlyDefault: watchOnlyDefault,
+		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Vnic")
 			return err
 		}
 
@@ -605,174 +983,354 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 func SetupWebhook(mgr manager.Manager, gvk schema.GroupVersionKind) error {
 	switch gvk {
 	case schema.GroupVersionKind{
-		Group:   "bgp.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Session",
+		Kind:    "Cluster",
 	}:
-		if err := (&bgpv1alpha1.Session{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Session")
+		if err := (&computev1alpha1.Cluster{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Cluster")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "connection.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Connection",
+		Kind:    "ClusterHostGroup",
 	}:
-		if err := (&connectionv1alpha1.Connection{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Connection")
+		if err := (&computev1alpha1.ClusterHostGroup{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "ClusterHostGroup")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "device.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Device",
+		Kind:    "ClusterVmAffinityRule",
 	}:
-		if err := (&devicev1alpha1.Device{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Device")
+		if err := (&computev1alpha1.ClusterVmAffinityRule{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "ClusterVmAffinityRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "device.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "NetworkType",
+		Kind:    "ClusterVmAntiAffinityRule",
 	}:
-		if err := (&devicev1alpha1.NetworkType{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "NetworkType")
+		if err := (&computev1alpha1.ClusterVmAntiAffinityRule{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "ClusterVmAntiAffinityRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "gateway.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Gateway",
+		Kind:    "ClusterVmDependencyRule",
 	}:
-		if err := (&gatewayv1alpha1.Gateway{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Gateway")
+		if err := (&computev1alpha1.ClusterVmDependencyRule{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "ClusterVmDependencyRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "ip.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Attachment",
+		Kind:    "ClusterVmGroup",
 	}:
-		if err := (&ipv1alpha1.Attachment{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Attachment")
+		if err := (&computev1alpha1.ClusterVmGroup{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "ClusterVmGroup")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "organization.vsphere.kubeform.com",
+		Group:   "compute.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Organization",
+		Kind:    "ClusterVmHostRule",
 	}:
-		if err := (&organizationv1alpha1.Organization{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Organization")
+		if err := (&computev1alpha1.ClusterVmHostRule{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "ClusterVmHostRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "port.vsphere.kubeform.com",
+		Group:   "content.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "VlanAttachment",
+		Kind:    "Library",
 	}:
-		if err := (&portv1alpha1.VlanAttachment{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "VlanAttachment")
+		if err := (&contentv1alpha1.Library{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Library")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.vsphere.kubeform.com",
+		Group:   "content.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Project",
+		Kind:    "LibraryItem",
 	}:
-		if err := (&projectv1alpha1.Project{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Project")
+		if err := (&contentv1alpha1.LibraryItem{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "LibraryItem")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.vsphere.kubeform.com",
+		Group:   "custom.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "ApiKey",
+		Kind:    "Attribute",
 	}:
-		if err := (&projectv1alpha1.ApiKey{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "ApiKey")
+		if err := (&customv1alpha1.Attribute{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Attribute")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "project.vsphere.kubeform.com",
+		Group:   "datacenter.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "SshKey",
+		Kind:    "Datacenter",
 	}:
-		if err := (&projectv1alpha1.SshKey{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "SshKey")
+		if err := (&datacenterv1alpha1.Datacenter{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Datacenter")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "reserved.vsphere.kubeform.com",
+		Group:   "datastore.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "IpBlock",
+		Kind:    "Cluster",
 	}:
-		if err := (&reservedv1alpha1.IpBlock{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "IpBlock")
+		if err := (&datastorev1alpha1.Cluster{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Cluster")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "spot.vsphere.kubeform.com",
+		Group:   "datastore.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "MarketRequest",
+		Kind:    "ClusterVmAntiAffinityRule",
 	}:
-		if err := (&spotv1alpha1.MarketRequest{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "MarketRequest")
+		if err := (&datastorev1alpha1.ClusterVmAntiAffinityRule{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "ClusterVmAntiAffinityRule")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "ssh.vsphere.kubeform.com",
+		Group:   "distributed.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Key",
+		Kind:    "PortGroup",
 	}:
-		if err := (&sshv1alpha1.Key{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Key")
+		if err := (&distributedv1alpha1.PortGroup{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "PortGroup")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "user.vsphere.kubeform.com",
+		Group:   "distributed.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "ApiKey",
+		Kind:    "VirtualSwitch",
 	}:
-		if err := (&userv1alpha1.ApiKey{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "ApiKey")
+		if err := (&distributedv1alpha1.VirtualSwitch{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "VirtualSwitch")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "dpm.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "HostOverride",
+	}:
+		if err := (&dpmv1alpha1.HostOverride{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "HostOverride")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "drs.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "VmOverride",
+	}:
+		if err := (&drsv1alpha1.VmOverride{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "VmOverride")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "entity.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Permissions",
+	}:
+		if err := (&entityv1alpha1.Permissions{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Permissions")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "file.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "File",
+	}:
+		if err := (&filev1alpha1.File{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "File")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "folder.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Folder",
+	}:
+		if err := (&folderv1alpha1.Folder{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Folder")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "ha.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "VmOverride",
+	}:
+		if err := (&hav1alpha1.VmOverride{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "VmOverride")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "host.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Host",
+	}:
+		if err := (&hostv1alpha1.Host{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Host")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "host.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "PortGroup",
+	}:
+		if err := (&hostv1alpha1.PortGroup{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "PortGroup")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "host.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "VirtualSwitch",
+	}:
+		if err := (&hostv1alpha1.VirtualSwitch{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "VirtualSwitch")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "license.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "License",
+	}:
+		if err := (&licensev1alpha1.License{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "License")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "nas.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Datastore",
+	}:
+		if err := (&nasv1alpha1.Datastore{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Datastore")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "resource.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Pool",
+	}:
+		if err := (&resourcev1alpha1.Pool{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Pool")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "role.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Role",
+	}:
+		if err := (&rolev1alpha1.Role{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Role")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "storage.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "DrsVmOverride",
+	}:
+		if err := (&storagev1alpha1.DrsVmOverride{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DrsVmOverride")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "tag.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Tag",
+	}:
+		if err := (&tagv1alpha1.Tag{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Tag")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "tag.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Category",
+	}:
+		if err := (&tagv1alpha1.Category{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Category")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "vapp.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Container",
+	}:
+		if err := (&vappv1alpha1.Container{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Container")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "vapp.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Entity",
+	}:
+		if err := (&vappv1alpha1.Entity{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Entity")
 			return err
 		}
 	case schema.GroupVersionKind{
 		Group:   "virtual.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Circuit",
+		Kind:    "Disk",
 	}:
-		if err := (&virtualv1alpha1.Circuit{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Circuit")
+		if err := (&virtualv1alpha1.Disk{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Disk")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "vlan.vsphere.kubeform.com",
+		Group:   "virtual.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Vlan",
+		Kind:    "Machine",
 	}:
-		if err := (&vlanv1alpha1.Vlan{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Vlan")
+		if err := (&virtualv1alpha1.Machine{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Machine")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "volume.vsphere.kubeform.com",
+		Group:   "virtual.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Volume",
+		Kind:    "MachineSnapshot",
 	}:
-		if err := (&volumev1alpha1.Volume{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Volume")
+		if err := (&virtualv1alpha1.MachineSnapshot{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "MachineSnapshot")
 			return err
 		}
 	case schema.GroupVersionKind{
-		Group:   "volume.vsphere.kubeform.com",
+		Group:   "vm.vsphere.kubeform.com",
 		Version: "v1alpha1",
-		Kind:    "Attachment",
+		Kind:    "StoragePolicy",
 	}:
-		if err := (&volumev1alpha1.Attachment{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Attachment")
+		if err := (&vmv1alpha1.StoragePolicy{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "StoragePolicy")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "vmfs.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Datastore",
+	}:
+		if err := (&vmfsv1alpha1.Datastore{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Datastore")
+			return err
+		}
+	case schema.GroupVersionKind{
+		Group:   "vnic.vsphere.kubeform.com",
+		Version: "v1alpha1",
+		Kind:    "Vnic",
+	}:
+		if err := (&vnicv1alpha1.Vnic{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Vnic")
 			return err
 		}
 
