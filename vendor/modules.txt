@@ -1153,7 +1153,7 @@ kmodules.xyz/resource-metadata/pkg/graph
 # kubeform.dev/apimachinery v0.0.0-20210629153539-7bcd34a30eb5
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
-# kubeform.dev/provider-vsphere-api v0.0.0-20210729222522-bba7c028e7e5
+# kubeform.dev/provider-vsphere-api v0.3.0
 ## explicit
 kubeform.dev/provider-vsphere-api/api/provider
 kubeform.dev/provider-vsphere-api/apis/compute
