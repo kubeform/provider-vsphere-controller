@@ -3,7 +3,7 @@
 
 # provider-vsphere-controller
 
-Kubeform controller for [Terraform Vsphere Provider](https://github.com/equinix/terraform-provider-metal)
+Kubeform controller for [Terraform VMware vSphere Provider](https://github.com/hashicorp/terraform-provider-vsphere)
 
 ## Installation
 
