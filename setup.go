@@ -98,7 +98,7 @@ var runningControllers = struct {
 	mp map[schema.GroupVersionKind]bool
 }{mp: make(map[schema.GroupVersionKind]bool)}
 
-func watchCRD(ctx context.Context, crdClient *clientset.Clientset, vwcClient *admissionregistrationv1.AdmissionregistrationV1Client, stopCh <-chan struct{}, mgr manager.Manager, auditor *auditlib.EventPublisher, watchOnlyDefault bool) error {
+func watchCRD(ctx context.Context, crdClient *clientset.Clientset, vwcClient *admissionregistrationv1.AdmissionregistrationV1Client, stopCh <-chan struct{}, mgr manager.Manager, auditor *auditlib.EventPublisher, restrictToNamespace string) error {
 	informerFactory := informers.NewSharedInformerFactory(crdClient, time.Second*30)
 	i := informerFactory.Apiextensions().V1().CustomResourceDefinitions().Informer()
 	l := informerFactory.Apiextensions().V1().CustomResourceDefinitions().Lister()
@@ -164,7 +164,7 @@ func watchCRD(ctx context.Context, crdClient *clientset.Clientset, vwcClient *ad
 						}
 					}
 
-					err = SetupManager(ctx, mgr, gvk, auditor, watchOnlyDefault)
+					err = SetupManager(ctx, mgr, gvk, auditor, restrictToNamespace)
 					if err != nil {
 						setupLog.Error(err, "unable to start manager")
 						os.Exit(1)
@@ -223,6 +223,7 @@ func updateVWC(vwcClient *admissionregistrationv1.AdmissionregistrationV1Client,
 		{
 			Operations: []arv1.OperationType{
 				arv1.Delete,
+				arv1.Update,
 			},
 			Rule: arv1.Rule{
 				APIGroups:   []string{strings.ToLower(gvk.Group)},
@@ -270,7 +271,7 @@ func updateVWC(vwcClient *admissionregistrationv1.AdmissionregistrationV1Client,
 	return nil
 }
 
-func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVersionKind, auditor *auditlib.EventPublisher, watchOnlyDefault bool) error {
+func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVersionKind, auditor *auditlib.EventPublisher, restrictToNamespace string) error {
 	switch gvk {
 	case schema.GroupVersionKind{
 		Group:   "compute.vsphere.kubeform.com",
@@ -278,15 +279,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Cluster",
 	}:
 		if err := (&controllerscompute.ClusterReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Cluster"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_compute_cluster"],
-			TypeName:         "vsphere_compute_cluster",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Cluster"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_compute_cluster"],
+			TypeName: "vsphere_compute_cluster",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Cluster")
 			return err
 		}
@@ -296,15 +296,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "ClusterHostGroup",
 	}:
 		if err := (&controllerscompute.ClusterHostGroupReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ClusterHostGroup"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_compute_cluster_host_group"],
-			TypeName:         "vsphere_compute_cluster_host_group",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("ClusterHostGroup"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_compute_cluster_host_group"],
+			TypeName: "vsphere_compute_cluster_host_group",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ClusterHostGroup")
 			return err
 		}
@@ -314,15 +313,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "ClusterVmAffinityRule",
 	}:
 		if err := (&controllerscompute.ClusterVmAffinityRuleReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmAffinityRule"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_compute_cluster_vm_affinity_rule"],
-			TypeName:         "vsphere_compute_cluster_vm_affinity_rule",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("ClusterVmAffinityRule"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_compute_cluster_vm_affinity_rule"],
+			TypeName: "vsphere_compute_cluster_vm_affinity_rule",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmAffinityRule")
 			return err
 		}
@@ -332,15 +330,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "ClusterVmAntiAffinityRule",
 	}:
 		if err := (&controllerscompute.ClusterVmAntiAffinityRuleReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmAntiAffinityRule"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_compute_cluster_vm_anti_affinity_rule"],
-			TypeName:         "vsphere_compute_cluster_vm_anti_affinity_rule",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("ClusterVmAntiAffinityRule"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_compute_cluster_vm_anti_affinity_rule"],
+			TypeName: "vsphere_compute_cluster_vm_anti_affinity_rule",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmAntiAffinityRule")
 			return err
 		}
@@ -350,15 +347,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "ClusterVmDependencyRule",
 	}:
 		if err := (&controllerscompute.ClusterVmDependencyRuleReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmDependencyRule"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_compute_cluster_vm_dependency_rule"],
-			TypeName:         "vsphere_compute_cluster_vm_dependency_rule",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("ClusterVmDependencyRule"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_compute_cluster_vm_dependency_rule"],
+			TypeName: "vsphere_compute_cluster_vm_dependency_rule",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmDependencyRule")
 			return err
 		}
@@ -368,15 +364,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "ClusterVmGroup",
 	}:
 		if err := (&controllerscompute.ClusterVmGroupReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmGroup"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_compute_cluster_vm_group"],
-			TypeName:         "vsphere_compute_cluster_vm_group",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("ClusterVmGroup"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_compute_cluster_vm_group"],
+			TypeName: "vsphere_compute_cluster_vm_group",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmGroup")
 			return err
 		}
@@ -386,15 +381,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "ClusterVmHostRule",
 	}:
 		if err := (&controllerscompute.ClusterVmHostRuleReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmHostRule"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_compute_cluster_vm_host_rule"],
-			TypeName:         "vsphere_compute_cluster_vm_host_rule",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("ClusterVmHostRule"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_compute_cluster_vm_host_rule"],
+			TypeName: "vsphere_compute_cluster_vm_host_rule",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmHostRule")
 			return err
 		}
@@ -404,15 +398,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Library",
 	}:
 		if err := (&controllerscontent.LibraryReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Library"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_content_library"],
-			TypeName:         "vsphere_content_library",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Library"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_content_library"],
+			TypeName: "vsphere_content_library",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Library")
 			return err
 		}
@@ -422,15 +415,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "LibraryItem",
 	}:
 		if err := (&controllerscontent.LibraryItemReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("LibraryItem"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_content_library_item"],
-			TypeName:         "vsphere_content_library_item",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("LibraryItem"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_content_library_item"],
+			TypeName: "vsphere_content_library_item",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "LibraryItem")
 			return err
 		}
@@ -440,15 +432,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Attribute",
 	}:
 		if err := (&controllerscustom.AttributeReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Attribute"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_custom_attribute"],
-			TypeName:         "vsphere_custom_attribute",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Attribute"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_custom_attribute"],
+			TypeName: "vsphere_custom_attribute",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Attribute")
 			return err
 		}
@@ -458,15 +449,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Datacenter",
 	}:
 		if err := (&controllersdatacenter.DatacenterReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Datacenter"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_datacenter"],
-			TypeName:         "vsphere_datacenter",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Datacenter"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_datacenter"],
+			TypeName: "vsphere_datacenter",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Datacenter")
 			return err
 		}
@@ -476,15 +466,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Cluster",
 	}:
 		if err := (&controllersdatastore.ClusterReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Cluster"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_datastore_cluster"],
-			TypeName:         "vsphere_datastore_cluster",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Cluster"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_datastore_cluster"],
+			TypeName: "vsphere_datastore_cluster",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Cluster")
 			return err
 		}
@@ -494,15 +483,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "ClusterVmAntiAffinityRule",
 	}:
 		if err := (&controllersdatastore.ClusterVmAntiAffinityRuleReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("ClusterVmAntiAffinityRule"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_datastore_cluster_vm_anti_affinity_rule"],
-			TypeName:         "vsphere_datastore_cluster_vm_anti_affinity_rule",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("ClusterVmAntiAffinityRule"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_datastore_cluster_vm_anti_affinity_rule"],
+			TypeName: "vsphere_datastore_cluster_vm_anti_affinity_rule",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ClusterVmAntiAffinityRule")
 			return err
 		}
@@ -512,15 +500,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "PortGroup",
 	}:
 		if err := (&controllersdistributed.PortGroupReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("PortGroup"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_distributed_port_group"],
-			TypeName:         "vsphere_distributed_port_group",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("PortGroup"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_distributed_port_group"],
+			TypeName: "vsphere_distributed_port_group",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "PortGroup")
 			return err
 		}
@@ -530,15 +517,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "VirtualSwitch",
 	}:
 		if err := (&controllersdistributed.VirtualSwitchReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("VirtualSwitch"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_distributed_virtual_switch"],
-			TypeName:         "vsphere_distributed_virtual_switch",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("VirtualSwitch"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_distributed_virtual_switch"],
+			TypeName: "vsphere_distributed_virtual_switch",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "VirtualSwitch")
 			return err
 		}
@@ -548,15 +534,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "HostOverride",
 	}:
 		if err := (&controllersdpm.HostOverrideReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("HostOverride"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_dpm_host_override"],
-			TypeName:         "vsphere_dpm_host_override",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("HostOverride"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_dpm_host_override"],
+			TypeName: "vsphere_dpm_host_override",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "HostOverride")
 			return err
 		}
@@ -566,15 +551,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "VmOverride",
 	}:
 		if err := (&controllersdrs.VmOverrideReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("VmOverride"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_drs_vm_override"],
-			TypeName:         "vsphere_drs_vm_override",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("VmOverride"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_drs_vm_override"],
+			TypeName: "vsphere_drs_vm_override",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "VmOverride")
 			return err
 		}
@@ -584,15 +568,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Permissions",
 	}:
 		if err := (&controllersentity.PermissionsReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Permissions"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_entity_permissions"],
-			TypeName:         "vsphere_entity_permissions",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Permissions"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_entity_permissions"],
+			TypeName: "vsphere_entity_permissions",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Permissions")
 			return err
 		}
@@ -602,15 +585,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "File",
 	}:
 		if err := (&controllersfile.FileReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("File"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_file"],
-			TypeName:         "vsphere_file",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("File"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_file"],
+			TypeName: "vsphere_file",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "File")
 			return err
 		}
@@ -620,15 +602,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Folder",
 	}:
 		if err := (&controllersfolder.FolderReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Folder"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_folder"],
-			TypeName:         "vsphere_folder",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Folder"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_folder"],
+			TypeName: "vsphere_folder",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Folder")
 			return err
 		}
@@ -638,15 +619,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "VmOverride",
 	}:
 		if err := (&controllersha.VmOverrideReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("VmOverride"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_ha_vm_override"],
-			TypeName:         "vsphere_ha_vm_override",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("VmOverride"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_ha_vm_override"],
+			TypeName: "vsphere_ha_vm_override",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "VmOverride")
 			return err
 		}
@@ -656,15 +636,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Host",
 	}:
 		if err := (&controllershost.HostReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Host"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_host"],
-			TypeName:         "vsphere_host",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Host"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_host"],
+			TypeName: "vsphere_host",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Host")
 			return err
 		}
@@ -674,15 +653,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "PortGroup",
 	}:
 		if err := (&controllershost.PortGroupReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("PortGroup"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_host_port_group"],
-			TypeName:         "vsphere_host_port_group",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("PortGroup"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_host_port_group"],
+			TypeName: "vsphere_host_port_group",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "PortGroup")
 			return err
 		}
@@ -692,15 +670,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "VirtualSwitch",
 	}:
 		if err := (&controllershost.VirtualSwitchReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("VirtualSwitch"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_host_virtual_switch"],
-			TypeName:         "vsphere_host_virtual_switch",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("VirtualSwitch"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_host_virtual_switch"],
+			TypeName: "vsphere_host_virtual_switch",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "VirtualSwitch")
 			return err
 		}
@@ -710,15 +687,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "License",
 	}:
 		if err := (&controllerslicense.LicenseReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("License"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_license"],
-			TypeName:         "vsphere_license",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("License"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_license"],
+			TypeName: "vsphere_license",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "License")
 			return err
 		}
@@ -728,15 +704,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Datastore",
 	}:
 		if err := (&controllersnas.DatastoreReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Datastore"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_nas_datastore"],
-			TypeName:         "vsphere_nas_datastore",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Datastore"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_nas_datastore"],
+			TypeName: "vsphere_nas_datastore",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Datastore")
 			return err
 		}
@@ -746,15 +721,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Pool",
 	}:
 		if err := (&controllersresource.PoolReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Pool"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_resource_pool"],
-			TypeName:         "vsphere_resource_pool",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Pool"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_resource_pool"],
+			TypeName: "vsphere_resource_pool",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Pool")
 			return err
 		}
@@ -764,15 +738,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Role",
 	}:
 		if err := (&controllersrole.RoleReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Role"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_role"],
-			TypeName:         "vsphere_role",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Role"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_role"],
+			TypeName: "vsphere_role",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Role")
 			return err
 		}
@@ -782,15 +755,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "DrsVmOverride",
 	}:
 		if err := (&controllersstorage.DrsVmOverrideReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("DrsVmOverride"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_storage_drs_vm_override"],
-			TypeName:         "vsphere_storage_drs_vm_override",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("DrsVmOverride"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_storage_drs_vm_override"],
+			TypeName: "vsphere_storage_drs_vm_override",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "DrsVmOverride")
 			return err
 		}
@@ -800,15 +772,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Tag",
 	}:
 		if err := (&controllerstag.TagReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Tag"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_tag"],
-			TypeName:         "vsphere_tag",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Tag"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_tag"],
+			TypeName: "vsphere_tag",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Tag")
 			return err
 		}
@@ -818,15 +789,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Category",
 	}:
 		if err := (&controllerstag.CategoryReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Category"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_tag_category"],
-			TypeName:         "vsphere_tag_category",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Category"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_tag_category"],
+			TypeName: "vsphere_tag_category",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Category")
 			return err
 		}
@@ -836,15 +806,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Container",
 	}:
 		if err := (&controllersvapp.ContainerReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Container"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_vapp_container"],
-			TypeName:         "vsphere_vapp_container",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Container"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_vapp_container"],
+			TypeName: "vsphere_vapp_container",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Container")
 			return err
 		}
@@ -854,15 +823,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Entity",
 	}:
 		if err := (&controllersvapp.EntityReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Entity"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_vapp_entity"],
-			TypeName:         "vsphere_vapp_entity",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Entity"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_vapp_entity"],
+			TypeName: "vsphere_vapp_entity",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Entity")
 			return err
 		}
@@ -872,15 +840,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Disk",
 	}:
 		if err := (&controllersvirtual.DiskReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Disk"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_virtual_disk"],
-			TypeName:         "vsphere_virtual_disk",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Disk"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_virtual_disk"],
+			TypeName: "vsphere_virtual_disk",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Disk")
 			return err
 		}
@@ -890,15 +857,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Machine",
 	}:
 		if err := (&controllersvirtual.MachineReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Machine"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_virtual_machine"],
-			TypeName:         "vsphere_virtual_machine",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Machine"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_virtual_machine"],
+			TypeName: "vsphere_virtual_machine",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Machine")
 			return err
 		}
@@ -908,15 +874,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "MachineSnapshot",
 	}:
 		if err := (&controllersvirtual.MachineSnapshotReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("MachineSnapshot"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_virtual_machine_snapshot"],
-			TypeName:         "vsphere_virtual_machine_snapshot",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("MachineSnapshot"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_virtual_machine_snapshot"],
+			TypeName: "vsphere_virtual_machine_snapshot",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "MachineSnapshot")
 			return err
 		}
@@ -926,15 +891,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "StoragePolicy",
 	}:
 		if err := (&controllersvm.StoragePolicyReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("StoragePolicy"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_vm_storage_policy"],
-			TypeName:         "vsphere_vm_storage_policy",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("StoragePolicy"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_vm_storage_policy"],
+			TypeName: "vsphere_vm_storage_policy",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "StoragePolicy")
 			return err
 		}
@@ -944,15 +908,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Datastore",
 	}:
 		if err := (&controllersvmfs.DatastoreReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Datastore"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_vmfs_datastore"],
-			TypeName:         "vsphere_vmfs_datastore",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Datastore"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_vmfs_datastore"],
+			TypeName: "vsphere_vmfs_datastore",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Datastore")
 			return err
 		}
@@ -962,15 +925,14 @@ func SetupManager(ctx context.Context, mgr manager.Manager, gvk schema.GroupVers
 		Kind:    "Vnic",
 	}:
 		if err := (&controllersvnic.VnicReconciler{
-			Client:           mgr.GetClient(),
-			Log:              ctrl.Log.WithName("controllers").WithName("Vnic"),
-			Scheme:           mgr.GetScheme(),
-			Gvk:              gvk,
-			Provider:         _provider,
-			Resource:         _provider.ResourcesMap["vsphere_vnic"],
-			TypeName:         "vsphere_vnic",
-			WatchOnlyDefault: watchOnlyDefault,
-		}).SetupWithManager(ctx, mgr, auditor); err != nil {
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("Vnic"),
+			Scheme:   mgr.GetScheme(),
+			Gvk:      gvk,
+			Provider: _provider,
+			Resource: _provider.ResourcesMap["vsphere_vnic"],
+			TypeName: "vsphere_vnic",
+		}).SetupWithManager(ctx, mgr, auditor, restrictToNamespace); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "Vnic")
 			return err
 		}
