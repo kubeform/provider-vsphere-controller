@@ -1352,7 +1352,7 @@ kmodules.xyz/resource-metrics/api
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
 kubeform.dev/apimachinery/pkg/util
-# kubeform.dev/provider-vsphere-api v0.3.1-0.20211020091115-f1f087f8a34e
+# kubeform.dev/provider-vsphere-api v0.4.0
 ## explicit
 kubeform.dev/provider-vsphere-api/api/provider
 kubeform.dev/provider-vsphere-api/apis/compute
