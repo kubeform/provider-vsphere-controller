@@ -53,322 +53,320 @@ type Data struct {
 	ResourceType string
 }
 
-var (
-	allJsonIt = map[schema.GroupVersionResource]Data{
-		{
-			Group:    "compute.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clusters",
-		}: {
-			JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_compute_cluster",
-		},
-		{
-			Group:    "compute.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clusterhostgroups",
-		}: {
-			JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_compute_cluster_host_group",
-		},
-		{
-			Group:    "compute.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clustervmaffinityrules",
-		}: {
-			JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_compute_cluster_vm_affinity_rule",
-		},
-		{
-			Group:    "compute.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clustervmantiaffinityrules",
-		}: {
-			JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_compute_cluster_vm_anti_affinity_rule",
-		},
-		{
-			Group:    "compute.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clustervmdependencyrules",
-		}: {
-			JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_compute_cluster_vm_dependency_rule",
-		},
-		{
-			Group:    "compute.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clustervmgroups",
-		}: {
-			JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_compute_cluster_vm_group",
-		},
-		{
-			Group:    "compute.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clustervmhostrules",
-		}: {
-			JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_compute_cluster_vm_host_rule",
-		},
-		{
-			Group:    "content.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "libraries",
-		}: {
-			JsonIt:       controllers.GetJSONItr(contentv1alpha1.GetEncoder(), contentv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_content_library",
-		},
-		{
-			Group:    "content.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "libraryitems",
-		}: {
-			JsonIt:       controllers.GetJSONItr(contentv1alpha1.GetEncoder(), contentv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_content_library_item",
-		},
-		{
-			Group:    "custom.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "attributes",
-		}: {
-			JsonIt:       controllers.GetJSONItr(customv1alpha1.GetEncoder(), customv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_custom_attribute",
-		},
-		{
-			Group:    "datacenter.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "datacenters",
-		}: {
-			JsonIt:       controllers.GetJSONItr(datacenterv1alpha1.GetEncoder(), datacenterv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_datacenter",
-		},
-		{
-			Group:    "datastore.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clusters",
-		}: {
-			JsonIt:       controllers.GetJSONItr(datastorev1alpha1.GetEncoder(), datastorev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_datastore_cluster",
-		},
-		{
-			Group:    "datastore.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "clustervmantiaffinityrules",
-		}: {
-			JsonIt:       controllers.GetJSONItr(datastorev1alpha1.GetEncoder(), datastorev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_datastore_cluster_vm_anti_affinity_rule",
-		},
-		{
-			Group:    "distributed.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "portgroups",
-		}: {
-			JsonIt:       controllers.GetJSONItr(distributedv1alpha1.GetEncoder(), distributedv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_distributed_port_group",
-		},
-		{
-			Group:    "distributed.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "virtualswitches",
-		}: {
-			JsonIt:       controllers.GetJSONItr(distributedv1alpha1.GetEncoder(), distributedv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_distributed_virtual_switch",
-		},
-		{
-			Group:    "dpm.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "hostoverrides",
-		}: {
-			JsonIt:       controllers.GetJSONItr(dpmv1alpha1.GetEncoder(), dpmv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_dpm_host_override",
-		},
-		{
-			Group:    "drs.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "vmoverrides",
-		}: {
-			JsonIt:       controllers.GetJSONItr(drsv1alpha1.GetEncoder(), drsv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_drs_vm_override",
-		},
-		{
-			Group:    "entity.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "permissions",
-		}: {
-			JsonIt:       controllers.GetJSONItr(entityv1alpha1.GetEncoder(), entityv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_entity_permissions",
-		},
-		{
-			Group:    "file.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "files",
-		}: {
-			JsonIt:       controllers.GetJSONItr(filev1alpha1.GetEncoder(), filev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_file",
-		},
-		{
-			Group:    "folder.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "folders",
-		}: {
-			JsonIt:       controllers.GetJSONItr(folderv1alpha1.GetEncoder(), folderv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_folder",
-		},
-		{
-			Group:    "ha.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "vmoverrides",
-		}: {
-			JsonIt:       controllers.GetJSONItr(hav1alpha1.GetEncoder(), hav1alpha1.GetDecoder()),
-			ResourceType: "vsphere_ha_vm_override",
-		},
-		{
-			Group:    "host.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "hosts",
-		}: {
-			JsonIt:       controllers.GetJSONItr(hostv1alpha1.GetEncoder(), hostv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_host",
-		},
-		{
-			Group:    "host.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "portgroups",
-		}: {
-			JsonIt:       controllers.GetJSONItr(hostv1alpha1.GetEncoder(), hostv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_host_port_group",
-		},
-		{
-			Group:    "host.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "virtualswitches",
-		}: {
-			JsonIt:       controllers.GetJSONItr(hostv1alpha1.GetEncoder(), hostv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_host_virtual_switch",
-		},
-		{
-			Group:    "license.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "licenses",
-		}: {
-			JsonIt:       controllers.GetJSONItr(licensev1alpha1.GetEncoder(), licensev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_license",
-		},
-		{
-			Group:    "nas.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "datastores",
-		}: {
-			JsonIt:       controllers.GetJSONItr(nasv1alpha1.GetEncoder(), nasv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_nas_datastore",
-		},
-		{
-			Group:    "resource.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "pools",
-		}: {
-			JsonIt:       controllers.GetJSONItr(resourcev1alpha1.GetEncoder(), resourcev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_resource_pool",
-		},
-		{
-			Group:    "role.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "roles",
-		}: {
-			JsonIt:       controllers.GetJSONItr(rolev1alpha1.GetEncoder(), rolev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_role",
-		},
-		{
-			Group:    "storage.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "drsvmoverrides",
-		}: {
-			JsonIt:       controllers.GetJSONItr(storagev1alpha1.GetEncoder(), storagev1alpha1.GetDecoder()),
-			ResourceType: "vsphere_storage_drs_vm_override",
-		},
-		{
-			Group:    "tag.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "tags",
-		}: {
-			JsonIt:       controllers.GetJSONItr(tagv1alpha1.GetEncoder(), tagv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_tag",
-		},
-		{
-			Group:    "tag.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "categories",
-		}: {
-			JsonIt:       controllers.GetJSONItr(tagv1alpha1.GetEncoder(), tagv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_tag_category",
-		},
-		{
-			Group:    "vapp.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "containers",
-		}: {
-			JsonIt:       controllers.GetJSONItr(vappv1alpha1.GetEncoder(), vappv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_vapp_container",
-		},
-		{
-			Group:    "vapp.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "entities",
-		}: {
-			JsonIt:       controllers.GetJSONItr(vappv1alpha1.GetEncoder(), vappv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_vapp_entity",
-		},
-		{
-			Group:    "virtual.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "disks",
-		}: {
-			JsonIt:       controllers.GetJSONItr(virtualv1alpha1.GetEncoder(), virtualv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_virtual_disk",
-		},
-		{
-			Group:    "virtual.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "machines",
-		}: {
-			JsonIt:       controllers.GetJSONItr(virtualv1alpha1.GetEncoder(), virtualv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_virtual_machine",
-		},
-		{
-			Group:    "virtual.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "machinesnapshots",
-		}: {
-			JsonIt:       controllers.GetJSONItr(virtualv1alpha1.GetEncoder(), virtualv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_virtual_machine_snapshot",
-		},
-		{
-			Group:    "vm.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "storagepolicies",
-		}: {
-			JsonIt:       controllers.GetJSONItr(vmv1alpha1.GetEncoder(), vmv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_vm_storage_policy",
-		},
-		{
-			Group:    "vmfs.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "datastores",
-		}: {
-			JsonIt:       controllers.GetJSONItr(vmfsv1alpha1.GetEncoder(), vmfsv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_vmfs_datastore",
-		},
-		{
-			Group:    "vnic.vsphere.kubeform.com",
-			Version:  "v1alpha1",
-			Resource: "vnics",
-		}: {
-			JsonIt:       controllers.GetJSONItr(vnicv1alpha1.GetEncoder(), vnicv1alpha1.GetDecoder()),
-			ResourceType: "vsphere_vnic",
-		},
-	}
-)
+var allJsonIt = map[schema.GroupVersionResource]Data{
+	{
+		Group:    "compute.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clusters",
+	}: {
+		JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_compute_cluster",
+	},
+	{
+		Group:    "compute.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clusterhostgroups",
+	}: {
+		JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_compute_cluster_host_group",
+	},
+	{
+		Group:    "compute.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clustervmaffinityrules",
+	}: {
+		JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_compute_cluster_vm_affinity_rule",
+	},
+	{
+		Group:    "compute.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clustervmantiaffinityrules",
+	}: {
+		JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_compute_cluster_vm_anti_affinity_rule",
+	},
+	{
+		Group:    "compute.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clustervmdependencyrules",
+	}: {
+		JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_compute_cluster_vm_dependency_rule",
+	},
+	{
+		Group:    "compute.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clustervmgroups",
+	}: {
+		JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_compute_cluster_vm_group",
+	},
+	{
+		Group:    "compute.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clustervmhostrules",
+	}: {
+		JsonIt:       controllers.GetJSONItr(computev1alpha1.GetEncoder(), computev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_compute_cluster_vm_host_rule",
+	},
+	{
+		Group:    "content.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "libraries",
+	}: {
+		JsonIt:       controllers.GetJSONItr(contentv1alpha1.GetEncoder(), contentv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_content_library",
+	},
+	{
+		Group:    "content.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "libraryitems",
+	}: {
+		JsonIt:       controllers.GetJSONItr(contentv1alpha1.GetEncoder(), contentv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_content_library_item",
+	},
+	{
+		Group:    "custom.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "attributes",
+	}: {
+		JsonIt:       controllers.GetJSONItr(customv1alpha1.GetEncoder(), customv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_custom_attribute",
+	},
+	{
+		Group:    "datacenter.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "datacenters",
+	}: {
+		JsonIt:       controllers.GetJSONItr(datacenterv1alpha1.GetEncoder(), datacenterv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_datacenter",
+	},
+	{
+		Group:    "datastore.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clusters",
+	}: {
+		JsonIt:       controllers.GetJSONItr(datastorev1alpha1.GetEncoder(), datastorev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_datastore_cluster",
+	},
+	{
+		Group:    "datastore.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "clustervmantiaffinityrules",
+	}: {
+		JsonIt:       controllers.GetJSONItr(datastorev1alpha1.GetEncoder(), datastorev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_datastore_cluster_vm_anti_affinity_rule",
+	},
+	{
+		Group:    "distributed.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "portgroups",
+	}: {
+		JsonIt:       controllers.GetJSONItr(distributedv1alpha1.GetEncoder(), distributedv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_distributed_port_group",
+	},
+	{
+		Group:    "distributed.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "virtualswitches",
+	}: {
+		JsonIt:       controllers.GetJSONItr(distributedv1alpha1.GetEncoder(), distributedv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_distributed_virtual_switch",
+	},
+	{
+		Group:    "dpm.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "hostoverrides",
+	}: {
+		JsonIt:       controllers.GetJSONItr(dpmv1alpha1.GetEncoder(), dpmv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_dpm_host_override",
+	},
+	{
+		Group:    "drs.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "vmoverrides",
+	}: {
+		JsonIt:       controllers.GetJSONItr(drsv1alpha1.GetEncoder(), drsv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_drs_vm_override",
+	},
+	{
+		Group:    "entity.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "permissions",
+	}: {
+		JsonIt:       controllers.GetJSONItr(entityv1alpha1.GetEncoder(), entityv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_entity_permissions",
+	},
+	{
+		Group:    "file.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "files",
+	}: {
+		JsonIt:       controllers.GetJSONItr(filev1alpha1.GetEncoder(), filev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_file",
+	},
+	{
+		Group:    "folder.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "folders",
+	}: {
+		JsonIt:       controllers.GetJSONItr(folderv1alpha1.GetEncoder(), folderv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_folder",
+	},
+	{
+		Group:    "ha.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "vmoverrides",
+	}: {
+		JsonIt:       controllers.GetJSONItr(hav1alpha1.GetEncoder(), hav1alpha1.GetDecoder()),
+		ResourceType: "vsphere_ha_vm_override",
+	},
+	{
+		Group:    "host.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "hosts",
+	}: {
+		JsonIt:       controllers.GetJSONItr(hostv1alpha1.GetEncoder(), hostv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_host",
+	},
+	{
+		Group:    "host.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "portgroups",
+	}: {
+		JsonIt:       controllers.GetJSONItr(hostv1alpha1.GetEncoder(), hostv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_host_port_group",
+	},
+	{
+		Group:    "host.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "virtualswitches",
+	}: {
+		JsonIt:       controllers.GetJSONItr(hostv1alpha1.GetEncoder(), hostv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_host_virtual_switch",
+	},
+	{
+		Group:    "license.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "licenses",
+	}: {
+		JsonIt:       controllers.GetJSONItr(licensev1alpha1.GetEncoder(), licensev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_license",
+	},
+	{
+		Group:    "nas.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "datastores",
+	}: {
+		JsonIt:       controllers.GetJSONItr(nasv1alpha1.GetEncoder(), nasv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_nas_datastore",
+	},
+	{
+		Group:    "resource.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "pools",
+	}: {
+		JsonIt:       controllers.GetJSONItr(resourcev1alpha1.GetEncoder(), resourcev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_resource_pool",
+	},
+	{
+		Group:    "role.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "roles",
+	}: {
+		JsonIt:       controllers.GetJSONItr(rolev1alpha1.GetEncoder(), rolev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_role",
+	},
+	{
+		Group:    "storage.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "drsvmoverrides",
+	}: {
+		JsonIt:       controllers.GetJSONItr(storagev1alpha1.GetEncoder(), storagev1alpha1.GetDecoder()),
+		ResourceType: "vsphere_storage_drs_vm_override",
+	},
+	{
+		Group:    "tag.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "tags",
+	}: {
+		JsonIt:       controllers.GetJSONItr(tagv1alpha1.GetEncoder(), tagv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_tag",
+	},
+	{
+		Group:    "tag.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "categories",
+	}: {
+		JsonIt:       controllers.GetJSONItr(tagv1alpha1.GetEncoder(), tagv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_tag_category",
+	},
+	{
+		Group:    "vapp.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "containers",
+	}: {
+		JsonIt:       controllers.GetJSONItr(vappv1alpha1.GetEncoder(), vappv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_vapp_container",
+	},
+	{
+		Group:    "vapp.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "entities",
+	}: {
+		JsonIt:       controllers.GetJSONItr(vappv1alpha1.GetEncoder(), vappv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_vapp_entity",
+	},
+	{
+		Group:    "virtual.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "disks",
+	}: {
+		JsonIt:       controllers.GetJSONItr(virtualv1alpha1.GetEncoder(), virtualv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_virtual_disk",
+	},
+	{
+		Group:    "virtual.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "machines",
+	}: {
+		JsonIt:       controllers.GetJSONItr(virtualv1alpha1.GetEncoder(), virtualv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_virtual_machine",
+	},
+	{
+		Group:    "virtual.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "machinesnapshots",
+	}: {
+		JsonIt:       controllers.GetJSONItr(virtualv1alpha1.GetEncoder(), virtualv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_virtual_machine_snapshot",
+	},
+	{
+		Group:    "vm.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "storagepolicies",
+	}: {
+		JsonIt:       controllers.GetJSONItr(vmv1alpha1.GetEncoder(), vmv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_vm_storage_policy",
+	},
+	{
+		Group:    "vmfs.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "datastores",
+	}: {
+		JsonIt:       controllers.GetJSONItr(vmfsv1alpha1.GetEncoder(), vmfsv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_vmfs_datastore",
+	},
+	{
+		Group:    "vnic.vsphere.kubeform.com",
+		Version:  "v1alpha1",
+		Resource: "vnics",
+	}: {
+		JsonIt:       controllers.GetJSONItr(vnicv1alpha1.GetEncoder(), vnicv1alpha1.GetDecoder()),
+		ResourceType: "vsphere_vnic",
+	},
+}
 
 func getJsonItAndResType(gvr schema.GroupVersionResource) Data {
 	return allJsonIt[gvr]
