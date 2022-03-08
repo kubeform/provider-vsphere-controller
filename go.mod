@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0
 	github.com/hashicorp/terraform-plugin-go v0.3.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
-	github.com/hashicorp/terraform-provider-vsphere v1.26.1-0.20210625182906-b8206ea7fc5a
+	github.com/hashicorp/terraform-provider-vsphere v1.26.1-0.20220228221536-2c4b91702134
 	github.com/imdario/mergo v0.3.12
 	github.com/json-iterator/go v1.1.11
 	github.com/pkg/errors v0.9.1
@@ -28,7 +28,7 @@ require (
 	k8s.io/klog/v2 v2.8.0
 	kmodules.xyz/client-go v0.0.0-20211028120227-48eb36f92a30
 	kubeform.dev/apimachinery v0.0.0-20210824104859-ba5604d5a1cc
-	kubeform.dev/provider-vsphere-api v0.4.1-0.20220215112832-577cd488058f
+	kubeform.dev/provider-vsphere-api v0.4.1-0.20220308122037-5d2768850f0c
 	kubeform.dev/terraform-backend-sdk v0.0.0-20210922115523-21574335f0db
 	sigs.k8s.io/cli-utils v0.25.0
 	sigs.k8s.io/controller-runtime v0.9.0

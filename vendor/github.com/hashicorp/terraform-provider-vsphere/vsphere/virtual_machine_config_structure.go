@@ -38,6 +38,11 @@ var virtualMachineSwapPlacementAllowedValues = []string{
 	string(types.VirtualMachineConfigInfoSwapPlacementTypeHostLocal),
 }
 
+var virtualMachineUpgradePolicyAllowedValues = []string{
+	string(types.UpgradePolicyManual),
+	string(types.UpgradePolicyUpgradeAtPowerCycle),
+}
+
 var virtualMachineFirmwareAllowedValues = []string{
 	string(types.GuestOsDescriptorFirmwareTypeBios),
 	string(types.GuestOsDescriptorFirmwareTypeEfi),
@@ -50,7 +55,7 @@ var virtualMachineLatencySensitivityAllowedValues = []string{
 	string(types.LatencySensitivitySensitivityLevelHigh),
 }
 
-// getWithRestart fetches the resoruce data specified at key. If the value has
+// getWithRestart fetches the resource data specified at key. If the value has
 // changed, a reboot is flagged in the virtual machine by setting
 // reboot_required to true.
 func getWithRestart(d *schema.ResourceData, key string) interface{} {
@@ -143,41 +148,48 @@ func schemaVirtualMachineConfigSpec() map[string]*schema.Schema {
 		"sync_time_with_host": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Description: "Enable guest clock synchronization with the host. On vSphere 7 U1 and above, with only this setting the clock is synchronized on startup and resume so consider also setting `sync_time_with_host_periodically`. Requires VMware tools to be installed.",
+			Description: "Enable guest clock synchronization with the host. On vSphere 7.0 U1 and above, with only this setting the clock is synchronized on startup and resume. Requires VMware Tools to be installed.",
+		},
+		"tools_upgrade_policy": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Default:      string(types.UpgradePolicyManual),
+			Description:  "Set the upgrade policy for VMware Tools. Can be one of `manual` or `upgradeAtPowerCycle`.",
+			ValidateFunc: validation.StringInSlice(virtualMachineUpgradePolicyAllowedValues, false),
 		},
 		"sync_time_with_host_periodically": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Description: "Enable periodic clock synchronization with the host. Supported only on vSphere 7 U1 and above. On older versions setting `sync_time_with_host` is enough for periodic synchronization. Requires VMware tools to be installed.",
+			Description: "Enable periodic clock synchronization with the host. Supported only on vSphere 7.0 U1 and above. On prior versions setting `sync_time_with_host` is enough for periodic synchronization. Requires VMware Tools to be installed.",
 		},
 		"run_tools_scripts_after_power_on": {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Enable the execution of post-power-on scripts when VMware tools is installed.",
+			Description: "Enable the run of scripts after virtual machine power-on when VMware Tools is installed.",
 		},
 		"run_tools_scripts_after_resume": {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Enable the execution of post-resume scripts when VMware tools is installed.",
+			Description: "Enable the run of scripts after virtual machine resume when when VMware Tools is installed.",
 		},
 		"run_tools_scripts_before_guest_reboot": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Description: "Enable the execution of pre-reboot scripts when VMware tools is installed.",
+			Description: "Enable the run of scripts before guest operating system reboot when VMware Tools is installed.",
 		},
 		"run_tools_scripts_before_guest_shutdown": {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Enable the execution of pre-shutdown scripts when VMware tools is installed.",
+			Description: "Enable the run of scripts before guest operating system shutdown when VMware Tools is installed.",
 		},
 		"run_tools_scripts_before_guest_standby": {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     true,
-			Description: "Enable the execution of pre-standby scripts when VMware tools is installed.",
+			Description: "Enable the run of scripts before guest operating system standby when VMware Tools is installed.",
 		},
 
 		// LatencySensitivity
@@ -249,6 +261,7 @@ func schemaVirtualMachineConfigSpec() map[string]*schema.Schema {
 		"annotation": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Computed:    true,
 			Description: "User-provided description of the virtual machine.",
 		},
 		"guest_id": {
@@ -272,13 +285,13 @@ func schemaVirtualMachineConfigSpec() map[string]*schema.Schema {
 		"alternate_guest_name": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "The guest name for the operating system when guest_id is other or other-64.",
+			Description: "The guest name for the operating system when guest_id is otherGuest or otherGuest64.",
 		},
 		"firmware": {
 			Type:         schema.TypeString,
 			Optional:     true,
 			Default:      string(types.GuestOsDescriptorFirmwareTypeBios),
-			Description:  "The firmware interface to use on the virtual machine. Can be one of bios or EFI.",
+			Description:  "The firmware interface to use on the virtual machine. Can be one of bios or efi.",
 			ValidateFunc: validation.StringInSlice(virtualMachineFirmwareAllowedValues, false),
 		},
 		"extra_config": {
@@ -413,6 +426,7 @@ func flattenVirtualMachineFlagInfo(d *schema.ResourceData, obj *types.VirtualMac
 func expandToolsConfigInfo(d *schema.ResourceData, client *govmomi.Client) *types.ToolsConfigInfo {
 	obj := &types.ToolsConfigInfo{
 		SyncTimeWithHost:    structure.GetBool(d, "sync_time_with_host"),
+		ToolsUpgradePolicy:  getWithRestart(d, "tools_upgrade_policy").(string),
 		AfterPowerOn:        getBoolWithRestart(d, "run_tools_scripts_after_power_on"),
 		AfterResume:         getBoolWithRestart(d, "run_tools_scripts_after_resume"),
 		BeforeGuestStandby:  getBoolWithRestart(d, "run_tools_scripts_before_guest_standby"),
@@ -432,6 +446,7 @@ func expandToolsConfigInfo(d *schema.ResourceData, client *govmomi.Client) *type
 // ToolsConfigInfo into the passed in ResourceData.
 func flattenToolsConfigInfo(d *schema.ResourceData, obj *types.ToolsConfigInfo, client *govmomi.Client) error {
 	_ = d.Set("sync_time_with_host", obj.SyncTimeWithHost)
+	_ = d.Set("tools_upgrade_policy", obj.ToolsUpgradePolicy)
 	_ = d.Set("run_tools_scripts_after_power_on", obj.AfterPowerOn)
 	_ = d.Set("run_tools_scripts_after_resume", obj.AfterResume)
 	_ = d.Set("run_tools_scripts_before_guest_standby", obj.BeforeGuestStandby)

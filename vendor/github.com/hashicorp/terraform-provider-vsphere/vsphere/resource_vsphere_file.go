@@ -195,7 +195,10 @@ func createFile(client *govmomi.Client, f *file) error {
 			return fmt.Errorf("error %s", err)
 		}
 	case path.Ext(f.sourceFile) == ".vmdk":
-		tempDstFile := fmt.Sprintf("tfm-temp-%d.vmdk", time.Now().Nanosecond())
+		_, fileName := path.Split(f.destinationFile)
+		// Temporary directory path to upload VMDK file.
+		tempDstFile := fmt.Sprintf("tfm-temp-%d/%s", time.Now().Nanosecond(), fileName)
+
 		err = fileUpload(client, dstDatacenter, dstDatastore, f.sourceFile, tempDstFile)
 		if err != nil {
 			return fmt.Errorf("error %s", err)
@@ -204,6 +207,7 @@ func createFile(client *govmomi.Client, f *file) error {
 		if err != nil {
 			return fmt.Errorf("error %s", err)
 		}
+
 	default:
 		err = fileUpload(client, dstDatacenter, dstDatastore, f.sourceFile, f.destinationFile)
 		if err != nil {
@@ -382,6 +386,7 @@ func resourceVSphereFileDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func deleteFile(client *govmomi.Client, f *file) error {
+
 	dc, err := getDatacenter(client, f.datacenter)
 	if err != nil {
 		return err
@@ -395,17 +400,36 @@ func deleteFile(client *govmomi.Client, f *file) error {
 		return fmt.Errorf("error %s", err)
 	}
 
-	fm := object.NewFileManager(client.Client)
-	task, err := fm.DeleteDatastoreFile(context.TODO(), ds.Path(f.destinationFile), dc)
-	if err != nil {
-		return err
+	// If the source file is a VMDK, the Delete method uses the correct DeleteVirtualDisk_Task
+	if path.Ext(f.destinationFile) == ".vmdk" {
+		vdm := object.NewVirtualDiskManager(client.Client)
+		task, err := vdm.DeleteVirtualDisk(context.TODO(), ds.Path(f.destinationFile), dc)
+		if err != nil {
+			return err
+		}
+
+		_, err = task.WaitForResult(context.TODO(), nil)
+		if err != nil {
+			return err
+		}
+		return nil
+
+	} else {
+		// If the source file is not a VMDK, the Delete method uses the correct DeleteDatastoreFile_Task
+		fm := object.NewFileManager(client.Client)
+		task, err := fm.DeleteDatastoreFile(context.TODO(), ds.Path(f.destinationFile), dc)
+		if err != nil {
+			return err
+		}
+
+		_, err = task.WaitForResult(context.TODO(), nil)
+		if err != nil {
+			return err
+		}
+		return nil
+
 	}
 
-	_, err = task.WaitForResult(context.TODO(), nil)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // getDatastore gets datastore object
