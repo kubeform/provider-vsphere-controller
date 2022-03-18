@@ -447,7 +447,6 @@ github.com/mitchellh/reflectwalk
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
-## explicit
 github.com/modern-go/reflect2
 # github.com/mozillazg/go-httpheader v0.3.0
 github.com/mozillazg/go-httpheader
@@ -1353,7 +1352,7 @@ kmodules.xyz/resource-metrics/api
 ## explicit
 kubeform.dev/apimachinery/api/v1alpha1
 kubeform.dev/apimachinery/pkg/util
-# kubeform.dev/provider-vsphere-api v0.4.1-0.20220308122037-5d2768850f0c
+# kubeform.dev/provider-vsphere-api v0.4.1-0.20220318012648-de547a67e520
 ## explicit
 kubeform.dev/provider-vsphere-api/api/provider
 kubeform.dev/provider-vsphere-api/apis/compute
